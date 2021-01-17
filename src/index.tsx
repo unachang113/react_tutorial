@@ -2,7 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function Square(props) {
+type ISquare = 'O' | 'X' | null;
+
+type SquareProps = {
+  value: ISquare;
+  onClick: () => void;
+};
+
+function Square(props: SquareProps) {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -10,8 +17,13 @@ function Square(props) {
   );
 }
 
-class Board extends React.Component {
-  renderSquare(i) {
+type BoardProps = {
+  squares: ISquare[];
+  onClick: (i: number) => void;
+};
+
+class Board extends React.Component<BoardProps> {
+  renderSquare(i: number) {
     return <Square
       value={this.props.squares[i]}
       onClick={()=> this.props.onClick(i)}
@@ -41,10 +53,18 @@ class Board extends React.Component {
   }
 }
 
-class Game extends React.Component {
-  constructor(props) {
-    // stateの初期化
-    // constructorを持つReactのclassコンポーネントはsuper(props)の呼び出しから始める
+type HistoryData = {
+  squares: ISquare[];
+};
+
+type GameState = {
+  history: HistoryData[];
+  stepNumber: number;
+  xIsNext: boolean;
+};
+
+class Game extends React.Component<{}, GameState> {
+  constructor(props: {}) {
     super(props);
     // 盤上の初期値を指定
     this.state = {
@@ -56,7 +76,7 @@ class Game extends React.Component {
     }
   }
 
-  handleClick(i) {
+  handleClick(i: number) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -74,7 +94,7 @@ class Game extends React.Component {
     });
   }
 
-  jumpTo(step) {
+  jumpTo(step: number) {
     this.setState({
       stepNumber: step,
       xIsNext: (step % 2) === 0
@@ -94,13 +114,12 @@ class Game extends React.Component {
       );
     });
 
-    let status;
+    let status: string = '';
     if (winner) {
       status = `Winner: ${winner}`;
     } else {
       status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
     }
-
 
     return (
       <div className="game">
@@ -120,7 +139,8 @@ class Game extends React.Component {
 }
 
 // ゲーム勝者の判定用ヘルパー
-function calculateWinner(squares) {
+
+function calculateWinner(squares: (string|null)[]) {
   // 勝ちパターン
   const lines = [
     [0, 1, 2],
